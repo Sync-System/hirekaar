@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { authFailureToastMessage } from "@/lib/auth-error-message";
+
 export function RegisterForm() {
   const router = useRouter();
   const [fullName, setFullName] = useState("");
@@ -26,9 +28,9 @@ export function RegisterForm() {
           role,
         }),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
       if (!res.ok) {
-        toast.error((data as { detail?: string }).detail ?? "Registration failed");
+        toast.error(authFailureToastMessage(data));
         return;
       }
       toast.success("Account created");

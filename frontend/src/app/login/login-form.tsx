@@ -4,6 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { authFailureToastMessage } from "@/lib/auth-error-message";
+
 export function LoginForm() {
   const router = useRouter();
   const sp = useSearchParams();
@@ -21,9 +23,9 @@ export function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, password }),
       });
-      const data = await res.json().catch(() => ({}));
+      const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
       if (!res.ok) {
-        toast.error((data as { detail?: string }).detail ?? "Login failed");
+        toast.error(authFailureToastMessage(data));
         return;
       }
       const user = (data as { user?: { role?: string } }).user;

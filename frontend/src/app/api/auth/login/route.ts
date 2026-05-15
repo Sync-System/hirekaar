@@ -5,15 +5,15 @@ import { apiInternalBase } from "@/lib/api-internal";
 const cookieSecure = process.env.VERCEL === "1" || process.env.NODE_ENV === "production";
 
 export async function POST(request: Request) {
+  const base = apiInternalBase();
   try {
     let body: unknown;
     try {
       body = await request.json();
     } catch {
-      return NextResponse.json({ detail: "Invalid JSON body" }, { status: 400 });
+      return NextResponse.json({ detail: "Invalid JSON body", api_base_url: base }, { status: 400 });
     }
 
-    const base = apiInternalBase();
     let res: Response;
     try {
       res = await fetch(`${base}/auth/login`, {
@@ -27,6 +27,7 @@ export async function POST(request: Request) {
         {
           detail:
             "Cannot reach the API backend. Set API_BASE_URL on Vercel to your FastAPI HTTPS origin, then redeploy.",
+          api_base_url: base,
         },
         { status: 503 },
       );
@@ -42,12 +43,15 @@ export async function POST(request: Request) {
 
     if (!res.ok) {
       console.error("[api/auth/login] upstream error", res.status, base, data);
-      return NextResponse.json(data, { status: res.status });
+      return NextResponse.json({ ...data, api_base_url: base }, { status: res.status });
     }
 
     const token = data.access_token as string | undefined;
     if (!token) {
-      return NextResponse.json({ detail: "No access_token in API response" }, { status: 502 });
+      return NextResponse.json(
+        { detail: "No access_token in API response", api_base_url: base },
+        { status: 502 },
+      );
     }
 
     let user: unknown = null;
@@ -74,6 +78,6 @@ export async function POST(request: Request) {
     return r;
   } catch (err) {
     console.error("[api/auth/login] unexpected:", err);
-    return NextResponse.json({ detail: "Login handler failed" }, { status: 500 });
+    return NextResponse.json({ detail: "Login handler failed", api_base_url: base }, { status: 500 });
   }
 }
