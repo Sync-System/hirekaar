@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
-import { CATEGORIES, CITIES, CATEGORY_LABELS } from "@/types";
+import { CATEGORIES, CITIES, CATEGORY_LABELS, type Category } from "@/types";
 
 export function NewJobForm() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState(CATEGORIES[0]!);
+  const [category, setCategory] = useState<Category>(CATEGORIES[0]!);
   const [city, setCity] = useState(CITIES[0]!);
   const [area, setArea] = useState("");
   const [budgetMin, setBudgetMin] = useState(5000);
