@@ -2,7 +2,7 @@ import html
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from sqlalchemy import text
 
 from app.core.config import get_settings
@@ -26,6 +26,12 @@ app.include_router(wallet.router)
 app.include_router(admin.router)
 app.include_router(reviews.router)
 app.include_router(public.router)
+
+
+@app.get("/", include_in_schema=True)
+def root():
+    """Avoid bare `/` returning 404; send humans to the status page."""
+    return RedirectResponse(url="/status", status_code=302)
 
 
 @app.get("/health")
