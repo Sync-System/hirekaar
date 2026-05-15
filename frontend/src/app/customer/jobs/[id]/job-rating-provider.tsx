@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
+import { hirekaarApi } from "@/lib/api-browser";
 import { JobRatingModal } from "./job-rating-modal";
 
 const SKIP_KEY = (jobId: string) => `hk_rating_skip_${jobId}`;
@@ -30,12 +31,12 @@ export function JobRatingProvider({ children }: { children: React.ReactNode }) {
 
     void (async () => {
       try {
-        const meRes = await fetch("/api/hirekaar/users/me");
+        const meRes = await fetch(hirekaarApi("/users/me"));
         if (!meRes.ok || ac.signal.aborted) return;
         const me = (await meRes.json()) as { id?: string; role?: string };
         if (me.role !== "customer") return;
 
-        const jobRes = await fetch(`/api/hirekaar/jobs/${jobId}`);
+        const jobRes = await fetch(hirekaarApi(`/jobs/${jobId}`));
         if (!jobRes.ok || ac.signal.aborted) return;
         const job = (await jobRes.json()) as {
           status?: string;
@@ -54,7 +55,7 @@ export function JobRatingProvider({ children }: { children: React.ReactNode }) {
 
         if (typeof window !== "undefined" && window.localStorage.getItem(SKIP_KEY(jobId))) return;
 
-        const revRes = await fetch(`/api/hirekaar/reviews/job/${jobId}`);
+        const revRes = await fetch(hirekaarApi(`/reviews/job/${jobId}`));
         if (!revRes.ok || ac.signal.aborted) return;
         const rev = (await revRes.json()) as { review?: { id: string } | null };
         if (rev.review?.id) return;

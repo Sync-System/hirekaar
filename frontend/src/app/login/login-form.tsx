@@ -5,6 +5,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { authFailureToastMessage } from "@/lib/auth-error-message";
+import { authApi } from "@/lib/api-browser";
 
 export function LoginForm() {
   const router = useRouter();
@@ -18,7 +19,7 @@ export function LoginForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch(authApi("/login"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, password }),

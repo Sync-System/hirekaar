@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { hirekaarApi } from "@/lib/api-browser";
+
 type Bid = { id: string; worker_id: string; amount: number; status: string };
 
 function formatApiError(data: unknown): string {
@@ -40,7 +42,7 @@ export function JobActions(props: {
     e.preventDefault();
     setBusy("bid");
     try {
-      const res = await fetch(`/api/hirekaar/jobs/${jobId}/bids`, {
+      const res = await fetch(hirekaarApi(`/jobs/${jobId}/bids`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount, message: message || null, eta: null }),
@@ -60,7 +62,7 @@ export function JobActions(props: {
   async function acceptBid(bidId: string) {
     setBusy(bidId);
     try {
-      const res = await fetch(`/api/hirekaar/jobs/${jobId}/accept/${bidId}`, { method: "POST" });
+      const res = await fetch(hirekaarApi(`/jobs/${jobId}/accept/${bidId}`), { method: "POST" });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         toast.error(formatApiError(data));
@@ -76,7 +78,7 @@ export function JobActions(props: {
   async function completeJob() {
     setBusy("complete");
     try {
-      const res = await fetch(`/api/hirekaar/jobs/${jobId}/complete`, { method: "POST" });
+      const res = await fetch(hirekaarApi(`/jobs/${jobId}/complete`), { method: "POST" });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         toast.error(formatApiError(data));

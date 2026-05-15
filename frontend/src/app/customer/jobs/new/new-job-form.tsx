@@ -5,6 +5,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { CATEGORIES, CITIES, CATEGORY_LABELS, type Category } from "@/types";
+import { hirekaarApi } from "@/lib/api-browser";
 
 export function NewJobForm() {
   const router = useRouter();
@@ -54,7 +55,7 @@ export function NewJobForm() {
         body.site_lng = site_lng;
       }
 
-      const res = await fetch("/api/hirekaar/jobs", {
+      const res = await fetch(hirekaarApi("/jobs"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

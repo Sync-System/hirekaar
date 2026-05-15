@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 import { CATEGORIES, CITIES, CATEGORY_LABELS } from "@/types";
+import { hirekaarApi } from "@/lib/api-browser";
 
 export function WorkerProfileForm() {
   const router = useRouter();
@@ -17,7 +18,7 @@ export function WorkerProfileForm() {
 
   useEffect(() => {
     void (async () => {
-      const res = await fetch("/api/hirekaar/users/me");
+      const res = await fetch(hirekaarApi("/users/me"));
       if (!res.ok) return;
       const u = (await res.json()) as {
         country?: string;
@@ -49,7 +50,7 @@ export function WorkerProfileForm() {
     }
     setLoading(true);
     try {
-      const p = await fetch("/api/hirekaar/users/me", {
+      const p = await fetch(hirekaarApi("/users/me"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -63,7 +64,7 @@ export function WorkerProfileForm() {
         toast.error(await p.text());
         return;
       }
-      const s = await fetch("/api/hirekaar/users/me/skills", {
+      const s = await fetch(hirekaarApi("/users/me/skills"), {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ skills }),

@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
+import { hirekaarApi } from "@/lib/api-browser";
+
 export function WalletPanel() {
   const [balance, setBalance] = useState<number | null>(null);
   const [topup, setTopup] = useState(500000);
@@ -10,7 +12,7 @@ export function WalletPanel() {
   const [busy, setBusy] = useState(false);
 
   async function refresh() {
-    const res = await fetch("/api/hirekaar/wallet/me");
+    const res = await fetch(hirekaarApi("/wallet/me"));
     if (res.ok) {
       const j = (await res.json()) as { balance_minor: number };
       setBalance(j.balance_minor);
@@ -24,7 +26,7 @@ export function WalletPanel() {
   async function doTopup() {
     setBusy(true);
     try {
-      const res = await fetch("/api/hirekaar/wallet/topup", {
+      const res = await fetch(hirekaarApi("/wallet/topup"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ amount_minor: topup }),
@@ -43,7 +45,7 @@ export function WalletPanel() {
   async function doBoost() {
     setBusy(true);
     try {
-      const res = await fetch("/api/hirekaar/wallet/boost", {
+      const res = await fetch(hirekaarApi("/wallet/boost"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ days }),

@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 
+import { hirekaarApi } from "@/lib/api-browser";
 import { CITIES } from "@/types";
 
 type Row = {
@@ -36,7 +37,7 @@ export function NearbyWorkersPanel() {
           radius_km: "25",
         });
         try {
-          const res = await fetch(`/api/hirekaar/public/workers-nearby?${q}`);
+          const res = await fetch(`${hirekaarApi("/public/workers-nearby")}?${q}`);
           const data = await res.json().catch(() => []);
           if (!res.ok) {
             toast.error(typeof data?.detail === "string" ? data.detail : "Could not load nearby workers");
@@ -63,7 +64,7 @@ export function NearbyWorkersPanel() {
     setLoading(true);
     try {
       const q = new URLSearchParams({ city });
-      const res = await fetch(`/api/hirekaar/public/workers-nearby?${q}`);
+      const res = await fetch(`${hirekaarApi("/public/workers-nearby")}?${q}`);
       const data = await res.json().catch(() => []);
       if (!res.ok) {
         toast.error("Could not load workers");

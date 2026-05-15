@@ -1,7 +1,12 @@
-/** Default FastAPI origin when the Next app is on Vercel and `API_BASE_URL` is unset. */
+import "server-only";
+
+/**
+ * FastAPI origin for Node only (Route Handlers + `api-server`). Set `API_BASE_URL`
+ * in repo `.env` / Vercel — not `NEXT_PUBLIC_*`, so the backend URL stays off the client.
+ * Browsers call `/api/hirekaar/*` and `/api/auth/*` instead (`api-browser.ts`).
+ */
 const VERCEL_DEFAULT_API_BASE = "https://hirekaar-backend.vercel.app";
 
-/** Server-only base URL for FastAPI (no trailing slash). */
 export function apiInternalBase(): string {
   const raw =
     process.env.API_BASE_URL?.trim() ||

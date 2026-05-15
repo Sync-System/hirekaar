@@ -3,6 +3,8 @@
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 
+import { hirekaarApi } from "@/lib/api-browser";
+
 type Props = {
   open: boolean;
   jobId: string;
@@ -35,7 +37,7 @@ export function JobRatingModal({ open, jobId, workerId, workerProfile, onClose, 
   const submit = useCallback(async () => {
     setBusy(true);
     try {
-      const res = await fetch(`/api/hirekaar/reviews/${jobId}`, {
+      const res = await fetch(hirekaarApi(`/reviews/${jobId}`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

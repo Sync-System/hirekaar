@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
 import { JobHistoryPanel } from "@/components/job-history-panel";
+import { hirekaarApi } from "@/lib/api-browser";
 import type { Job } from "@/types";
 
 type MineResponse = { jobs: Job[] };
@@ -44,8 +45,8 @@ export function WorkerJobRequests() {
 
   const load = useCallback(async () => {
     const [openRes, mineRes] = await Promise.all([
-      fetch("/api/hirekaar/jobs?status=open"),
-      fetch("/api/hirekaar/jobs/me"),
+      fetch(hirekaarApi("/jobs?status=open")),
+      fetch(hirekaarApi("/jobs/me")),
     ]);
     const open = openRes.ok ? ((await openRes.json()) as Job[]) : [];
     const mine = mineRes.ok ? ((await mineRes.json()) as MineResponse) : { jobs: [] };
@@ -75,7 +76,7 @@ export function WorkerJobRequests() {
     setBusy(job.id);
     try {
       const amount = job.recommended_price ?? Math.round((job.budget_min + job.budget_max) / 2);
-      const res = await fetch(`/api/hirekaar/jobs/${job.id}/bids`, {
+      const res = await fetch(hirekaarApi(`/jobs/${job.id}/bids`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

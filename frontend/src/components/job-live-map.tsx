@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 
+import { hirekaarApi } from "@/lib/api-browser";
+
 type LeafletModule = typeof import("leaflet");
 
 const TRACK_INTERVAL_MS = 2000;
@@ -175,7 +177,7 @@ export function JobLiveMap(props: {
     const L = leafletRef.current;
     const map = mapInstance.current;
     if (!L || !map) return;
-    const res = await fetch(`/api/hirekaar/jobs/${jobId}/tracking`);
+    const res = await fetch(hirekaarApi(`/jobs/${jobId}/tracking`));
     if (!res.ok) return;
     const d = (await res.json()) as TrackingPayload;
     await applyFromPayload(L, map, d);
@@ -185,7 +187,7 @@ export function JobLiveMap(props: {
     const L = leafletRef.current;
     const map = mapInstance.current;
     if (!L || !map) return;
-    const res = await fetch(`/api/hirekaar/jobs/${jobId}/tracking`);
+    const res = await fetch(hirekaarApi(`/jobs/${jobId}/tracking`));
     if (!res.ok) return;
     const d = (await res.json()) as TrackingPayload;
     const siteOk = d.site_lat != null && d.site_lng != null;
@@ -217,7 +219,7 @@ export function JobLiveMap(props: {
       const now = Date.now();
       if (now - lastPost.current < POST_THROTTLE_MS) return;
       lastPost.current = now;
-      const res = await fetch(`/api/hirekaar/jobs/${jobId}/tracking`, {
+      const res = await fetch(hirekaarApi(`/jobs/${jobId}/tracking`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ lat, lng }),
@@ -239,7 +241,7 @@ export function JobLiveMap(props: {
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude, longitude } = pos.coords;
-        const res = await fetch(`/api/hirekaar/jobs/${jobId}/site`, {
+        const res = await fetch(hirekaarApi(`/jobs/${jobId}/site`), {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ lat: latitude, lng: longitude }),

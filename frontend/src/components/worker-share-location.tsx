@@ -3,6 +3,8 @@
 import { useState } from "react";
 import toast from "react-hot-toast";
 
+import { hirekaarApi } from "@/lib/api-browser";
+
 /** Push one GPS fix to the API so customers can find this worker in “nearby” search. */
 export function WorkerShareLocation() {
   const [busy, setBusy] = useState(false);
@@ -11,7 +13,7 @@ export function WorkerShareLocation() {
     void (async () => {
       setBusy(true);
       try {
-        const res = await fetch("/api/hirekaar/users/me/location", {
+        const res = await fetch(hirekaarApi("/users/me/location"), {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ lat, lng }),

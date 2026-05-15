@@ -5,6 +5,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 
 import { CITIES } from "@/types";
+import { hirekaarApi } from "@/lib/api-browser";
 
 export function CompleteProfileForm() {
   const router = useRouter();
@@ -16,7 +17,7 @@ export function CompleteProfileForm() {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await fetch("/api/hirekaar/users/me", {
+      const res = await fetch(hirekaarApi("/users/me"), {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ country, city }),

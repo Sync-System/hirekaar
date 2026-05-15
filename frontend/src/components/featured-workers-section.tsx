@@ -1,4 +1,4 @@
-import { apiInternalBase } from "@/lib/api-internal";
+import { apiFetch } from "@/lib/api-server";
 
 type Featured = {
   id: string;
@@ -11,7 +11,7 @@ type Featured = {
 export async function FeaturedWorkersSection() {
   let rows: Featured[] = [];
   try {
-    const res = await fetch(`${apiInternalBase()}/public/featured-workers`, { cache: "no-store" });
+    const res = await apiFetch("/public/featured-workers", { cache: "no-store" });
     if (res.ok) rows = (await res.json()) as Featured[];
   } catch {
     rows = [];
