@@ -1,0 +1,15 @@
+# Production Next.js (standalone). Build from `frontend/`:
+#   docker compose --env-file .env -f docker-compose.yml -f docker-compose.prod.yml build web
+services:
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    env_file:
+      - .env
+    volumes: []
+    environment:
+      WATCHPACK_POLLING: ""
+      CHOKIDAR_USEPOLLING: ""

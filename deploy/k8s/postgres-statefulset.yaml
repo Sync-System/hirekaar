@@ -1,0 +1,61 @@
+# Dev / demo only — use RDS, Cloud SQL, or Azure Database for production.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hirekaar-postgres
+  namespace: hirekaar
+spec:
+  ports:
+    - port: 5432
+      targetPort: 5432
+  clusterIP: None
+  selector:
+    app: hirekaar-postgres
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hirekaar-postgres
+  namespace: hirekaar
+spec:
+  serviceName: hirekaar-postgres
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hirekaar-postgres
+  template:
+    metadata:
+      labels:
+        app: hirekaar-postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:18-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              value: hirekaar
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: hirekaar-db-secret
+                  key: password
+            - name: POSTGRES_DB
+              value: hirekaar
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "hirekaar", "-d", "hirekaar"]
+            initialDelaySeconds: 5
+            periodSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi

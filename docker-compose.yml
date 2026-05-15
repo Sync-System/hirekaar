@@ -1,0 +1,59 @@
+# HirKaar — Postgres + FastAPI + Next.js (single root `.env` for local full stack).
+#
+#   cp .env.example .env
+#   docker compose up --build
+#   docker compose exec api python scripts/seed_demo.py
+#   Open http://localhost:3000
+#
+# Set `POSTGRES_*` and either omit `DATABASE_URL` (URL is built for the API) or set
+# `DATABASE_URL` explicitly (e.g. Neon). See `.env.example`.
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hirekaar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-hirekaar}
+      POSTGRES_DB: ${POSTGRES_DB:-hirekaar}
+    ports:
+      - "${POSTGRES_PUBLISHED_PORT:-5433}:5432"
+    volumes:
+      - hirekaar_pg18:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${API_PUBLISHED_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    env_file:
+      - .env
+    ports:
+      - "${WEB_PUBLISHED_PORT:-3000}:3000"
+    environment:
+      WATCHPACK_POLLING: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - api
+
+volumes:
+  hirekaar_pg18:
