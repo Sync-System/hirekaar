@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { apiInternalBase } from "@/lib/api-internal";
+import { AUTH_COOKIE_NAME } from "@/lib/auth-cookie";
 
 const ALLOWED_PREFIX = new Set(["users", "jobs", "wallet", "reviews", "admin", "public"]);
 
@@ -18,7 +19,7 @@ async function forward(
   }
   const url = new URL(req.url);
   const path = targetPath(segments) + url.search;
-  const token = req.cookies.get("hk_token")?.value;
+  const token = req.cookies.get(AUTH_COOKIE_NAME)?.value;
   const headers = new Headers();
   if (token) headers.set("Authorization", `Bearer ${token}`);
   let body: BodyInit | undefined;
@@ -48,4 +49,9 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ path?: st
 export async function PUT(req: NextRequest, ctx: { params: Promise<{ path?: string[] }> }) {
   const { path = [] } = await ctx.params;
   return forward("PUT", req, path);
+}
+
+export async function DELETE(req: NextRequest, ctx: { params: Promise<{ path?: string[] }> }) {
+  const { path = [] } = await ctx.params;
+  return forward("DELETE", req, path);
 }

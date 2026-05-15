@@ -3,16 +3,26 @@
   docker compose exec api python scripts/seed_demo.py
 
 Uses the same env as the API (`DATABASE_URL` or `POSTGRES_*` — see root `.env.example`).
+Refuses to run when ENVIRONMENT=production unless ALLOW_DEMO_SEED=1.
 """
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 
 _root = Path(__file__).resolve().parents[1]
 if str(_root) not in sys.path:
     sys.path.insert(0, str(_root))
+
+if os.environ.get("ENVIRONMENT", "development").lower() in ("production", "prod"):
+    if os.environ.get("ALLOW_DEMO_SEED", "").strip().lower() not in ("1", "true", "yes"):
+        print(
+            "Refusing seed_demo: ENVIRONMENT is production. Set ALLOW_DEMO_SEED=1 to override.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 from datetime import UTC, datetime
 from decimal import Decimal

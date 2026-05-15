@@ -11,6 +11,11 @@ export async function GET() {
   } catch {
     apiOk = false;
   }
+
+  if (process.env.NODE_ENV === "production") {
+    return NextResponse.json({ ok: true, api_reachable: apiOk });
+  }
+
   const explicitEnv = Boolean(
     process.env.API_BASE_URL?.trim() || process.env.API_INTERNAL_URL?.trim(),
   );
@@ -22,11 +27,8 @@ export async function GET() {
     next: process.env.NODE_ENV,
     vercel: Boolean(process.env.VERCEL),
     api_base_url_configured: explicitEnv,
-    /** True when using built-in production API URL (no API_BASE_URL set on Vercel). */
     api_base_uses_vercel_baked_default: usesVercelBakedDefault,
-    /** Origin used for server-side API proxy (public URL; not a secret). */
     api_base_resolved: resolvedBase,
-    /** True when using local FastAPI default (local `npm run dev`). */
     api_base_is_default_localhost: resolvedBase === "http://127.0.0.1:8000",
     api_reachable: apiOk,
   });

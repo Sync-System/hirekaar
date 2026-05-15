@@ -40,6 +40,12 @@ def topup(
 ):
     if user.role != "worker":
         raise HTTPException(status_code=403, detail="Wallet is for workers")
+    s = get_settings()
+    if not s.ALLOW_WALLET_DEMO_TOPUP:
+        raise HTTPException(
+            status_code=403,
+            detail="Wallet demo top-up is disabled. Set ALLOW_WALLET_DEMO_TOPUP=true only in trusted non-production environments.",
+        )
     w = _wallet(db, user.id)
     w.balance_minor += body.amount_minor
     db.add(

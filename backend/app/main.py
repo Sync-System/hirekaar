@@ -1,4 +1,6 @@
 import html
+import logging
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,15 +10,32 @@ from sqlalchemy import text
 from app.core.config import get_settings
 from app.routers import admin, auth, jobs, public, reviews, users, wallet
 
-app = FastAPI(title="HirKaar API", version="0.2.0")
+logger = logging.getLogger(__name__)
+
+_DEFAULT_JWT = "change-me-use-openssl-rand-hex-32"
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    s = get_settings()
+    env = (s.ENVIRONMENT or "development").lower()
+    if env in ("production", "prod"):
+        if (s.JWT_SECRET or "").strip() == _DEFAULT_JWT or len((s.JWT_SECRET or "").strip()) < 24:
+            msg = "ENVIRONMENT=production requires a strong JWT_SECRET (not the default; min 24 chars)."
+            logger.critical(msg)
+            raise RuntimeError(msg)
+    yield
+
+
+app = FastAPI(title="HirKaar API", version="0.2.0", lifespan=lifespan)
 
 s = get_settings()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[o.strip() for o in s.CORS_ORIGINS.split(",") if o.strip()],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"],
 )
 
 app.include_router(auth.router)
@@ -49,7 +68,8 @@ def health_db():
         with get_engine().connect() as c:
             c.execute(text("SELECT 1"))
     except Exception as exc:  # noqa: BLE001
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        logger.exception("health_db check failed")
+        raise HTTPException(status_code=503, detail="Database unavailable") from exc
     return {"status": "ok", "database": True}
 
 
@@ -66,7 +86,12 @@ def status_dashboard():
         db_ok = True
         db_detail = "PostgreSQL responded to SELECT 1."
     except Exception as exc:  # noqa: BLE001
-        db_detail = html.escape(str(exc)[:2000])
+        s = get_settings()
+        if (s.ENVIRONMENT or "development").lower() in ("production", "prod"):
+            logger.exception("status dashboard db check failed")
+            db_detail = html.escape("Database connection failed.")
+        else:
+            db_detail = html.escape(str(exc)[:2000])
 
     badge_ok = "background:#bef264;color:#0a0a0a;"
     badge_bad = "background:#fecaca;color:#450a0a;"

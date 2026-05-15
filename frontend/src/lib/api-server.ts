@@ -3,9 +3,10 @@ import "server-only";
 import { cookies } from "next/headers";
 
 import { apiInternalBase } from "@/lib/api-internal";
+import { AUTH_COOKIE_NAME } from "@/lib/auth-cookie";
 
 async function getToken(): Promise<string | undefined> {
-  return (await cookies()).get("hk_token")?.value;
+  return (await cookies()).get(AUTH_COOKIE_NAME)?.value;
 }
 
 export async function apiFetch(path: string, init: RequestInit = {}): Promise<Response> {

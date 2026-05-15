@@ -1,8 +1,10 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { AUTH_COOKIE_NAME } from "@/lib/auth-cookie";
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("hk_token");
+  const token = request.cookies.get(AUTH_COOKIE_NAME)?.value;
   if (
     (pathname.startsWith("/customer") ||
       pathname.startsWith("/worker") ||

@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     PLATFORM_FEE_RATE: float = 0.10
     BOOST_PRICE_PER_DAY_MINOR: int = 500
     CORS_ORIGINS: str = "http://localhost:3000"
+    # development | staging | production — used for startup checks and demo flags.
+    ENVIRONMENT: str = "development"
+    # Demo-only: arbitrary wallet credit. Must stay false in real production.
+    ALLOW_WALLET_DEMO_TOPUP: bool = False
 
     @model_validator(mode="after")
     def assemble_database_url(self) -> Self:

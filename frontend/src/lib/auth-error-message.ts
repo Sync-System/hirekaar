@@ -16,12 +16,7 @@ export function formatAuthErrorDetail(data: Record<string, unknown>): string {
   return "Something went wrong.";
 }
 
-/** Toast + optional API base from Next proxy (see Network response `api_base_url`). */
+/** Toast message from FastAPI `detail` (string or validation array). */
 export function authFailureToastMessage(data: Record<string, unknown>): string {
-  let msg = formatAuthErrorDetail(data);
-  const b = data.api_base_url;
-  if (typeof b === "string" && b.length > 0) {
-    msg = `${msg} — API: ${b}`;
-  }
-  return msg;
+  return formatAuthErrorDetail(data);
 }

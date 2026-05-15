@@ -34,4 +34,4 @@ For production databases, prefer **managed Postgres** (RDS, Cloud SQL, Azure Dat
 
 ## Web environment
 
-Mount **`API_BASE_URL`** (in-cluster API base URL, e.g. `http://hirekaar-api:8000`), **`NEXT_PUBLIC_APP_URL`** (public site URL), and **`NODE_ENV=production`** via **`hirekaar-web-env`** (see `secret-web.example.yaml`). The API image expects **`DATABASE_URL`** (SQLAlchemy `postgresql+psycopg2://…`) or **`POSTGRES_*`** in **`hirekaar-api-secret`** / env (see `secret-api.example.yaml` and root **`.env.example`**).
+Mount **`API_BASE_URL`** (in-cluster API base URL, e.g. `http://hirekaar-api:8000`), **`NEXT_PUBLIC_APP_URL`** (public site URL), and **`NODE_ENV=production`** via **`hirekaar-web-env`** (see `secret-web.example.yaml`). The API deployment uses **`envFrom: hirekaar-api-secret`**: include **`DATABASE_URL`**, **`JWT_SECRET`** (strong, ≥24 chars when **`ENVIRONMENT=production`**), **`CORS_ORIGINS`**, **`ENVIRONMENT`**, and optionally **`ALLOW_WALLET_DEMO_TOPUP`** — see **`secret-api.example.yaml`** and root **`.env.example`**.
