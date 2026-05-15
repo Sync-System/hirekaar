@@ -8,11 +8,18 @@ import "server-only";
 /** Live API: https://hirekaar-backend.vercel.app/ — trailing slash stripped when used. */
 export const HIREKAAR_DEFAULT_API_BASE_URL = "https://hirekaar-backend.vercel.app";
 
+function onVercelRuntime(): boolean {
+  return (
+    process.env.VERCEL === "1" ||
+    process.env.VERCEL === "true" ||
+    Boolean(process.env.VERCEL_ENV)
+  );
+}
+
 export function apiInternalBase(): string {
-  const raw =
-    process.env.API_BASE_URL?.trim() ||
-    process.env.API_INTERNAL_URL?.trim() ||
-    (process.env.VERCEL === "1" ? HIREKAAR_DEFAULT_API_BASE_URL : "") ||
-    "http://127.0.0.1:8000";
-  return raw.replace(/\/$/, "");
+  const fromEnv = process.env.API_BASE_URL?.trim() || process.env.API_INTERNAL_URL?.trim();
+  if (fromEnv) return fromEnv.replace(/\/$/, "");
+  // Temporary hardcode: Vercel serverless always targets production API when env omits API_BASE_URL.
+  if (onVercelRuntime()) return HIREKAAR_DEFAULT_API_BASE_URL.replace(/\/$/, "");
+  return "http://127.0.0.1:8000";
 }
